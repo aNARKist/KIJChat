@@ -13,7 +13,7 @@ import java.util.Random;
  */
 public class RNG {
     
-    private static String keyGen() {
+    public static String keyGen() {
         char[] chars = "1234567890abcdefghijklmnopqrstuvwxyz".toCharArray();
         StringBuilder sb = new StringBuilder();
         Random random = new Random();

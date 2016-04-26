@@ -66,7 +66,7 @@ public class RC444 {
             }
             i++;
         }
-       long l=Long.parseLong(kumpul.substring(0,5));
+       long l=Long.parseLong(kumpul.substring(0,4)+kumpul.substring(8,12));
        return l;
     }
 }
