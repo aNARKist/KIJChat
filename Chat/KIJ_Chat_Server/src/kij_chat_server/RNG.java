@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package kij_chat_server;
+package kij_chat_client;
 
 import java.util.Random;
 
@@ -13,7 +13,7 @@ import java.util.Random;
  */
 public class RNG {
     
-    public static String keyGen() {
+    private static String keyGen() {
         char[] chars = "1234567890abcdefghijklmnopqrstuvwxyz".toCharArray();
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
