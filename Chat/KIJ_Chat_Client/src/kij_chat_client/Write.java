@@ -21,20 +21,19 @@ public class Write implements Runnable {
     
 	private Scanner chat;
         private OutputStream os;
-        private Scanner in;//MAKE SOCKET INSTANCE VARIABLE
+       // private Scanner in;//MAKE SOCKET INSTANCE VARIABLE
         boolean keepGoing = true;
         ArrayList<String> log;
-        String key;
+        String kunci;
         String username;
-        Client client;
+        key Keys;
 	
-	public Write(Scanner chat, OutputStream os, ArrayList<String> log, Client client)
+	public Write(Scanner chat, OutputStream os, ArrayList<String> log, key Keys)
 	{
 		this.chat = chat;
                 this.os = os;
                 this.log = log;
-                this.in = in;
-                this.client=client;
+                this.Keys=Keys;
 	}
 	
 	@Override
@@ -45,9 +44,12 @@ public class Write implements Runnable {
                         
 			while (keepGoing)//WHILE THE PROGRAM IS RUNNING
 			{	
-                                key=client.getKey();
+
 				String input = chat.nextLine();	//SET NEW VARIABLE input TO THE VALUE OF WHAT THE CLIENT TYPED IN
-				/*if (input.split(" ")[0].toLowerCase().equals("login") == true) {
+                                //System.out.println("kunci : "+kunci);
+                                kunci=Keys.getKey();
+                                //System.out.println("kunci bru: "+kunci);
+                                /*if (input.split(" ")[0].toLowerCase().equals("login") == true) {
                                     System.out.println("masuk firstkey");
                                     out.println("firstkey");
                                     out.flush();//FLUSH THE STREAM
@@ -66,9 +68,9 @@ public class Write implements Runnable {
                                     
                                 }*/
                                 if (input.split(" ")[0].toLowerCase().equals("login") == true) {
-                                    byte[] outing= AES.encryption(input, key);
+                                    byte[] outing= AES.encryption(input, kunci);
                                     username=input.split(" ")[1];
-                                    client.setUsername(username);
+                                    Keys.setUsername(username);
                                     os.write(outing);
                                     os.flush();
                                 }
@@ -76,9 +78,9 @@ public class Write implements Runnable {
                                     String[] vals=input.split(" ",3);
                                     String seed=username+vals[1];
                                     String pesan=RC444.encryptPRNG(vals[2], seed);
+                                    System.out.println(seed);
                                     String pes=vals[0]+" "+vals[1]+" "+pesan;
-                                    byte[]outing=AES.encryption(pes, key);
-                                    System.out.println(key);
+                                    byte[]outing=AES.encryption(pes, kunci);
                                     os.write(outing);
                                     os.flush();
                                 }
@@ -87,7 +89,7 @@ public class Write implements Runnable {
                                     String seed=username+vals[1];
                                     String pesan=RC444.encryptPRNG(vals[2], seed);
                                     String pes=vals[0]+" "+vals[1]+" "+pesan;
-                                    byte[]outing=AES.encryption(pes, key);
+                                    byte[]outing=AES.encryption(pes, kunci);
                                     os.write(outing);
                                     os.flush();
                                 }
@@ -95,8 +97,8 @@ public class Write implements Runnable {
                                     String[] vals=input.split(" ",2);
                                     String seed=username+"broadcast";
                                     String pesan=RC444.encryptPRNG(vals[1], seed);
-                                    String pes=vals[0]+" "+vals[1]+" "+pesan;
-                                    byte[]outing=AES.encryption(pes, key);
+                                    String pes=vals[0]+" "+pesan;
+                                    byte[]outing=AES.encryption(pes, kunci);
                                     os.write(outing);
                                     os.flush();
                                 }
@@ -105,7 +107,7 @@ public class Write implements Runnable {
                                         keepGoing = false;
                                 }
                                 else {
-                                    byte[] outuing=AES.encryption(input, key);
+                                    byte[] outuing=AES.encryption(input, kunci);
                                     os.write(outuing);
                                     os.flush();
                                 }

@@ -16,7 +16,9 @@ public class RC444 {
     public static String encryptPRNG(String k, String Key){
         String seed=k;
         int i=0;
-        int[] keys=PRNG(Strtolong(Key),seed.length());
+        long Skt=Strtolong(Key);
+       // System.out.println(Skt+" "+ seed.length());
+        int[] keys=PRNG(Skt,seed.length());
         char[] seedarray=seed.toCharArray();
         for(;i<seed.length();i++){
             char a=seedarray[i];
@@ -33,7 +35,9 @@ public class RC444 {
         String seed=k;
         
         int i;
-        int[] keys=PRNG(Strtolong(Key),seed.length());
+        long Skt=Strtolong(Key);
+        //System.out.println(Skt+" "+ seed.length());
+        int[] keys=PRNG(Skt,seed.length());
         char[] seedarray=seed.toCharArray();
         for(i=seed.length()-1;i>-1;i--){
             char a=seedarray[i];
@@ -50,6 +54,7 @@ public class RC444 {
         Random random = new Random(seed);
         for (int i = 0; i < length; i++) {
             rng[i] = random.nextInt(length);
+            //System.out.print(rng[i]+" ");
         }
         return rng;
     }
@@ -66,7 +71,7 @@ public class RC444 {
             }
             i++;
         }
-       long l=Long.parseLong(kumpul.substring(0,4)+kumpul.substring(8,12));
+       long l=Long.parseLong(kumpul.substring(0,4));//+kumpul.substring(8,12));
        return l;
     }
 }

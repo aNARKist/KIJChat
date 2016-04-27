@@ -53,6 +53,7 @@ public class Client implements Runnable{
 			{		
 				if (is.available()!=0)
 				{
+                                    System.out.println("\n");
                                      String input="";
                                      while(is.available()!=0){
                                          byte[] buff=new byte[16];
@@ -60,7 +61,7 @@ public class Client implements Runnable{
                                          input+=AES.decryption(buff, key);
                                      }
                                      input=input.trim();
-                                     System.out.println("Inputan : "+input);
+                                     //System.out.println("Inputan : "+input);
 					//String input = in.nextLine();//IF THERE IS INPUT THEN MAKE A NEW VARIABLE input AND READ WHAT THEY TYPED
 //					System.out.println("Client Said: " + input);//PRINT IT OUT TO THE SCREEN
 //					out.println("You Said: " + input);//RESEND IT TO THE CLIENT
@@ -153,12 +154,13 @@ public class Client implements Runnable{
                                                     System.out.println(this.username + " to " + vals[1] + " : " + messageOut);
                                                     //outDest.println(this.username + ": " + messageOut);
                                                     //outDest.flush();
-                                                    String pesan=this.username + ": " + messageOut;
+                                                    String pesan=this.username + " : " + messageOut;
 
                                                     for(Pair<String,String> cue : _keylist){
                                                         if(cue.getFirst().equals(cur.getSecond())){
                                                             String keyout=cue.getSecond();
-                                                            byte[] outing=AES.encrypt(pesan, keyout);
+                                                            //System.out.println("panjang yg mau dikirim : "+pesan.length());
+                                                            byte[] outing=AES.encryption(pesan, keyout);
                                                             osDest.write(outing);
                                                             osDest.flush();
                                                         }
@@ -170,7 +172,7 @@ public class Client implements Runnable{
                                                 System.out.println("pm to " + vals[1] + " by " + this.username + " failed.");
                                                 //out.println("FAIL pm");
                                                 //out.flush();
-                                                byte[] outing=AES.encrypt("FAILPM", key);
+                                                byte[] outing=AES.encryption("FAILPM", key);
                                                 osDest.write(outing);
                                                 osDest.flush();
                                             }
@@ -195,14 +197,14 @@ public class Client implements Runnable{
                                                 System.out.println("cg " + vals[1] + " by " + this.username + " successed.");
                                                 //out.println("SUCCESS cg");
                                                 //out.flush();
-                                                byte[] outing=AES.encrypt("SUCCESS cg", key);
+                                                byte[] outing=AES.encryption("SUCCESS cg", key);
                                                 os.write(outing);
                                                 os.flush();
                                             } else {
                                                 System.out.println("cg " + vals[1] + " by " + this.username + " failed.");
                                                 //out.println("FAIL cg");
                                                 //out.flush();
-                                                byte[] outing=AES.encrypt("FAIL cg", key);
+                                                byte[] outing=AES.encryption("FAIL cg", key);
                                                 os.write(outing);
                                                 os.flush();
                                             }
@@ -238,7 +240,7 @@ public class Client implements Runnable{
                                                                 for(Pair<String,String> cue : _keylist){
                                                                     if(cue.getFirst().equals(cur.getSecond())){
                                                                         String keyout=cue.getSecond();
-                                                                        byte[] outing=AES.encrypt(pesan, keyout);
+                                                                        byte[] outing=AES.encryption(pesan, keyout);
                                                                         osDest.write(outing);
                                                                         osDest.flush();
                                                                     }
@@ -252,7 +254,7 @@ public class Client implements Runnable{
                                                 System.out.println("gm to " + vals[1] + " by " + this.username + " failed.");
                                                 //out.println("FAIL gm");
                                                 //out.flush();
-                                                byte[] outing=AES.encrypt("FAIL gm", key);
+                                                byte[] outing=AES.encryption("FAIL gm", key);
                                                 os.write(outing);
                                                 os.flush();
                                             }
@@ -276,7 +278,7 @@ public class Client implements Runnable{
                                                     for(Pair<String,String> cue : _keylist){
                                                         if(cue.getFirst().equals(cur.getSecond())){
                                                             String keyout=cue.getSecond();
-                                                            byte[] outing=AES.encrypt(pesan, keyout);
+                                                            byte[] outing=AES.encryption(pesan, keyout);
                                                             osDest.write(outing);
                                                             osDest.flush();
                                                         }
@@ -303,7 +305,7 @@ public class Client implements Runnable{
             sb.append(c);
         }
         String tese= sb.toString();
-        System.out.println(tese);
+        //System.out.println(tese);
         return tese;
     }
 }

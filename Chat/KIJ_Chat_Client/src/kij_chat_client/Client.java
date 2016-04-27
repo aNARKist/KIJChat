@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
+import kij_chat_client.key;
 /** original ->http://www.dreamincode.net/forums/topic/262304-simple-client-and-server-chat-program/
  * 
  * @author santen-suru
@@ -15,9 +17,7 @@ import java.util.Scanner;
 public class Client implements Runnable {
 
 	private Socket socket;//MAKE SOCKET INSTANCE VARIABLE
-        private String key="0123456789abcdef";
-        private String username="";
-        
+        private key Keys;
         // use arraylist -> arraylist dapat diparsing as reference
         volatile ArrayList<String> log = new ArrayList<>();
         
@@ -32,6 +32,7 @@ public class Client implements Runnable {
 	{
 		try
 		{
+                        Keys=new key();
 			Scanner chat = new Scanner(System.in);//GET THE INPUT FROM THE CMD
 			//Scanner in = new Scanner(socket.getInputStream());//GET THE CLIENTS INPUT STREAM (USED TO READ DATA SENT FROM THE SERVER)
 			//PrintWriter out = new PrintWriter(socket.getOutputStream());//GET THE CLIENTS OUTPUT STREAM (USED TO SEND DATA TO THE SERVER)
@@ -46,13 +47,14 @@ public class Client implements Runnable {
 //				if(in.hasNext())//IF THE SERVER SENT US SOMETHING
 //					System.out.println(in.nextLine());//PRINT IT OUT
 //			}
-                        
-                        Read reader = new Read(is, log, this);
+                        Keys.setKey("0123456789abcdef");
+                        //key="0123456789abcdef";
+                        Read reader = new Read(is, log, Keys);
 			
 			Thread tr = new Thread(reader);
 			tr.start();
                         
-                        Write writer = new Write(chat, os, log, this);
+                        Write writer = new Write(chat, os, log, Keys);
 			
 			Thread tw = new Thread(writer);
 			tw.start();
@@ -69,34 +71,5 @@ public class Client implements Runnable {
 			e.printStackTrace();//MOST LIKELY WONT BE AN ERROR, GOOD PRACTICE TO CATCH THOUGH
 		} 
 	}
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key the key to set
-     */
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    /**
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * @param username the username to set
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
 }
 

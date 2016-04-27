@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import kij_chat_client.key;
 /**
  *
  * @author santen-suru
@@ -20,15 +21,16 @@ public class Read implements Runnable {
         String input;
         boolean keepGoing = true;
         ArrayList<String> log;
-        Client client;
-        String key;
+        //Client client;
+        key Keys;
+        String kunci;
         String username;
 	
-	public Read(InputStream is, ArrayList<String> log, Client client)
+	public Read(InputStream is, ArrayList<String> log, key Keys)
 	{
 		this.is = is;
                 this.log = log;
-                this.client=client;
+                this.Keys=Keys;
 	}
     
         @Override
@@ -38,18 +40,18 @@ public class Read implements Runnable {
 		{
 			while (keepGoing)//WHILE THE PROGRAM IS RUNNING
 			{	
-                                key=client.getKey();
-                                username=client.getUsername();
+                                kunci=Keys.getKey();
+                                username=Keys.getUsername();
 				if(this.is.available()!=0) {
                                                                    //IF THE SERVER SENT US SOMETHING
                                         String masuk="";
                                         while(this.is.available()!=0){
                                             byte[] buff=new byte[16];
                                             is.read(buff);
-                                            masuk+=AES.decryption(buff, key);
+                                            masuk+=AES.decryption(buff, kunci);
                                         }
                                         masuk=masuk.trim();
-                                        System.out.println(masuk);
+                                        //System.out.println(masuk);
                                         if (masuk.split(" ")[0].toLowerCase().equals("success")) {
                                             if (masuk.split(" ")[1].toLowerCase().equals("logout")) {
                                                 keepGoing = false;
@@ -57,10 +59,10 @@ public class Read implements Runnable {
                                             } else if (masuk.split(" ")[1].toLowerCase().equals("login")) {
                                                 log.clear();
                                                 log.add("true");
-                                                System.out.println(masuk);
+                                                System.out.println(masuk.split(" ")[0]+" "+masuk.split(" ")[1]);
                                                 String key2=masuk.split(" ")[2];
-                                                client.setKey(key2);
-                                                System.out.println(key + " "+ key2+" "+ "1"+username);
+                                                Keys.setKey(key2);
+                                                System.out.println(kunci + " "+ key2+" "+username);
                                             }
                                         }
                                         else if(masuk.split(" ")[0].toLowerCase().equals("fail")){
@@ -72,33 +74,41 @@ public class Read implements Runnable {
                                             System.out.println(masuk);}
                                         }
                                         else{
+                                            //System.out.println("Masuk ke message..");
                                             String[] vals=masuk.split(" ");
-                                            if(vals[1]==":"){
+                                            if(vals[1].equals(":")){
+                                                //System.out.println("Masuk ke Pmessage..");
                                                 String key2=vals[0]+username;
                                                 String pesaaan="";
                                                 for(int i=2;i<vals.length;i++){
-                                                    pesaaan+=vals[i];
+                                                    pesaaan+=vals[i]+" ";
                                                 }
+                                                pesaaan=pesaaan.trim();
+                                                //System.out.println(key2);
                                                 String pesan=RC444.decryptPRNG(pesaaan, key2);
                                                 String pes=vals[0]+" "+vals[1]+" "+pesan;
                                                 System.out.println(pes);
                                             }
-                                            else if(vals[1]=="@"){
+                                            else if(vals[1].equals("@")){
+                                               // System.out.println("Masuk ke Gmessage..");
                                                 String key2=vals[0]+vals[2];
                                                 String pesaaan="";
                                                 for(int i=4;i<vals.length;i++){
-                                                    pesaaan+=vals[i];
+                                                    pesaaan+=vals[i]+" ";
                                                 }
+                                                pesaaan=pesaaan.trim();
                                                 String pesan=RC444.decryptPRNG(pesaaan, key2);
                                                 String pes=vals[0]+" "+vals[1]+" "+vals[2]+" "+vals[3]+" "+pesan;
                                                 System.out.println(pes);
                                             }
                                             else if(vals[1].toLowerCase().equals("<broadcast>:")){
+                                                //System.out.println("Masuk ke Gmessage..");
                                                 String key2=vals[0]+"broadcast";
                                                 String pesaaan="";
                                                 for(int i=2;i<vals.length;i++){
-                                                    pesaaan+=vals[i];
+                                                    pesaaan+=vals[i]+" ";
                                                 }
+                                                pesaaan=pesaaan.trim();
                                                 String pesan=RC444.decryptPRNG(pesaaan, key2);
                                                 String pes=vals[0]+" "+vals[1]+" "+pesan;
                                                 System.out.println(pes);

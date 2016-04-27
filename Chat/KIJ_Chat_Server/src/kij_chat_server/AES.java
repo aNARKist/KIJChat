@@ -30,6 +30,7 @@ public class AES {
           plaintext += "\0";
       }
       byte[] combined=new byte[plaintext.length()];
+      //System.out.println("panjang : " + plaintext.length());
       
       while((o*16)<plaintext.length()){
           try {
