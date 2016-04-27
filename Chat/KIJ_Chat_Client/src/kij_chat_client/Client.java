@@ -1,5 +1,7 @@
 package kij_chat_client;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import java.util.Scanner;
 public class Client implements Runnable {
 
 	private Socket socket;//MAKE SOCKET INSTANCE VARIABLE
+        private String key="0123456789abcdef";
+        private String username="";
         
         // use arraylist -> arraylist dapat diparsing as reference
         volatile ArrayList<String> log = new ArrayList<>();
@@ -29,9 +33,10 @@ public class Client implements Runnable {
 		try
 		{
 			Scanner chat = new Scanner(System.in);//GET THE INPUT FROM THE CMD
-			Scanner in = new Scanner(socket.getInputStream());//GET THE CLIENTS INPUT STREAM (USED TO READ DATA SENT FROM THE SERVER)
-			PrintWriter out = new PrintWriter(socket.getOutputStream());//GET THE CLIENTS OUTPUT STREAM (USED TO SEND DATA TO THE SERVER)
-			
+			//Scanner in = new Scanner(socket.getInputStream());//GET THE CLIENTS INPUT STREAM (USED TO READ DATA SENT FROM THE SERVER)
+			//PrintWriter out = new PrintWriter(socket.getOutputStream());//GET THE CLIENTS OUTPUT STREAM (USED TO SEND DATA TO THE SERVER)
+			InputStream is=socket.getInputStream();
+                        OutputStream os=socket.getOutputStream();
 //			while (true)//WHILE THE PROGRAM IS RUNNING
 //			{						
 //				String input = chat.nextLine();	//SET NEW VARIABLE input TO THE VALUE OF WHAT THE CLIENT TYPED IN
@@ -42,12 +47,12 @@ public class Client implements Runnable {
 //					System.out.println(in.nextLine());//PRINT IT OUT
 //			}
                         
-                        Read reader = new Read(in, log);
+                        Read reader = new Read(is, log, this);
 			
 			Thread tr = new Thread(reader);
 			tr.start();
                         
-                        Write writer = new Write(chat, out, in, log);
+                        Write writer = new Write(chat, os, log, this);
 			
 			Thread tw = new Thread(writer);
 			tw.start();
@@ -64,6 +69,34 @@ public class Client implements Runnable {
 			e.printStackTrace();//MOST LIKELY WONT BE AN ERROR, GOOD PRACTICE TO CATCH THOUGH
 		} 
 	}
+
+    /**
+     * @return the key
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * @param key the key to set
+     */
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username the username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
 }
 

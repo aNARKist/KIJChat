@@ -5,6 +5,7 @@
  */
 package kij_chat_client;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import static java.lang.Thread.sleep;
 import java.net.Socket;
@@ -19,18 +20,21 @@ import java.util.Scanner;
 public class Write implements Runnable {
     
 	private Scanner chat;
-        private PrintWriter out;
+        private OutputStream os;
         private Scanner in;//MAKE SOCKET INSTANCE VARIABLE
         boolean keepGoing = true;
         ArrayList<String> log;
-        private String firstkey= "0123456789abcdef";
+        String key;
+        String username;
+        Client client;
 	
-	public Write(Scanner chat, PrintWriter out, Scanner in, ArrayList<String> log)
+	public Write(Scanner chat, OutputStream os, ArrayList<String> log, Client client)
 	{
 		this.chat = chat;
-                this.out = out;
+                this.os = os;
                 this.log = log;
                 this.in = in;
+                this.client=client;
 	}
 	
 	@Override
@@ -38,10 +42,12 @@ public class Write implements Runnable {
 	{
 		try
 		{
+                        
 			while (keepGoing)//WHILE THE PROGRAM IS RUNNING
-			{						
+			{	
+                                key=client.getKey();
 				String input = chat.nextLine();	//SET NEW VARIABLE input TO THE VALUE OF WHAT THE CLIENT TYPED IN
-				if (input.split(" ")[0].toLowerCase().equals("login") == true) {
+				/*if (input.split(" ")[0].toLowerCase().equals("login") == true) {
                                     System.out.println("masuk firstkey");
                                     out.println("firstkey");
                                     out.flush();//FLUSH THE STREAM
@@ -58,16 +64,55 @@ public class Write implements Runnable {
                                     System.out.println(decrypted);
                                     String[] vals = input.split(" ");
                                     
+                                }*/
+                                if (input.split(" ")[0].toLowerCase().equals("login") == true) {
+                                    byte[] outing= AES.encryption(input, key);
+                                    username=input.split(" ")[1];
+                                    client.setUsername(username);
+                                    os.write(outing);
+                                    os.flush();
                                 }
-                                out.println(input);//SEND IT TO THE SERVER
-				out.flush();//FLUSH THE STREAM
-                                
-                                //if ()
-                                if (input.contains("logout")) {
+                                else if(input.split(" ")[0].toLowerCase().equals("pm")==true) {
+                                    String[] vals=input.split(" ",3);
+                                    String seed=username+vals[1];
+                                    String pesan=RC444.encryptPRNG(vals[2], seed);
+                                    String pes=vals[0]+" "+vals[1]+" "+pesan;
+                                    byte[]outing=AES.encryption(pes, key);
+                                    System.out.println(key);
+                                    os.write(outing);
+                                    os.flush();
+                                }
+                                else if(input.split(" ")[0].toLowerCase().equals("gm")==true){
+                                    String[] vals=input.split(" ",3);
+                                    String seed=username+vals[1];
+                                    String pesan=RC444.encryptPRNG(vals[2], seed);
+                                    String pes=vals[0]+" "+vals[1]+" "+pesan;
+                                    byte[]outing=AES.encryption(pes, key);
+                                    os.write(outing);
+                                    os.flush();
+                                }
+                                else if(input.split(" ")[0].toLowerCase().equals("bm")==true){
+                                    String[] vals=input.split(" ",2);
+                                    String seed=username+"broadcast";
+                                    String pesan=RC444.encryptPRNG(vals[1], seed);
+                                    String pes=vals[0]+" "+vals[1]+" "+pesan;
+                                    byte[]outing=AES.encryption(pes, key);
+                                    os.write(outing);
+                                    os.flush();
+                                }
+                                else if (input.split(" ")[0].toLowerCase().equals("logout")==true) {
                                     if (log.contains("true"))
                                         keepGoing = false;
-                                    
                                 }
+                                else {
+                                    byte[] outuing=AES.encryption(input, key);
+                                    os.write(outuing);
+                                    os.flush();
+                                }
+                                //out.println(input);//SEND IT TO THE SERVER
+				//out.flush();//FLUSH THE STREAM
+                                
+                                //if ()
 			}
 		}
 		catch (Exception e)

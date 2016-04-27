@@ -59,6 +59,8 @@ public class Client implements Runnable{
                                          is.read(buff);
                                          input+=AES.decryption(buff, key);
                                      }
+                                     input=input.trim();
+                                     System.out.println("Inputan : "+input);
 					//String input = in.nextLine();//IF THERE IS INPUT THEN MAKE A NEW VARIABLE input AND READ WHAT THEY TYPED
 //					System.out.println("Client Said: " + input);//PRINT IT OUT TO THE SCREEN
 //					out.println("You Said: " + input);//RESEND IT TO THE CLIENT
@@ -76,38 +78,25 @@ public class Client implements Runnable{
                                             System.out.println(decrypted);
                                         }*/
                                        
-                                        if(k==0){
-                                            String key2=keyGen();
-                                            byte[] keyout=AES.encryption(key2, key);
-                                            key=key2;
-                                            _keylist.add(new Pair(username,key));
-                                            os.write(keyout);
-                                            os.flush();
-                                            k=1;
-                                        }
-                                        else{
-                                            // param LOGIN <userName> <pass>
-                                            if (input.split(" ")[0].toLowerCase().equals("login") == true) {
-                                                String[] vals = input.split(" ");
+                                        // param LOGIN <userName> <pass>
+                                        if (input.split(" ")[0].toLowerCase().equals("login") == true) {
+                                            String[] vals = input.split(" ");
 
-                                                if (this._userlist.contains(new Pair(vals[1], vals[2])) == true) {
-                                                    if (this.login == false) {
-                                                        this._loginlist.add(new Pair(this.socket, vals[1]));
-                                                        this.username = vals[1];
-                                                        this.login = true;
-                                                        System.out.println("Users count: " + this._loginlist.size());
-                                                        byte[] outing=AES.encryption("SUCCESS login", key);
-                                                        //out.println("SUCCESS login");
-                                                        //out.flush();
-                                                        os.write(outing);
-                                                        os.flush();
-                                                    } else {
-                                                        byte[] outing=AES.encryption("FAIL login", key);
-                                                        //out.println("FAIL login");
-                                                        //out.flush();
-                                                        os.write(outing);
-                                                        os.flush();
-                                                    }
+                                            if (this._userlist.contains(new Pair(vals[1], vals[2])) == true) {
+                                                if (this.login == false) {
+                                                    this._loginlist.add(new Pair(this.socket, vals[1]));
+                                                    this.username = vals[1];
+                                                    this.login = true;
+                                                    System.out.println("Users count: " + this._loginlist.size());
+                                                    String key2=keyGen();
+                                                    k=1;
+                                                    byte[] outing=AES.encryption("SUCCESS login "+key2, key);
+                                                    //out.println("SUCCESS login");
+                                                    //out.flush();
+                                                    os.write(outing);
+                                                    os.flush();
+                                                    key=key2;
+                                                    _keylist.add(new Pair(username,key));
                                                 } else {
                                                     byte[] outing=AES.encryption("FAIL login", key);
                                                     //out.println("FAIL login");
@@ -115,180 +104,187 @@ public class Client implements Runnable{
                                                     os.write(outing);
                                                     os.flush();
                                                 }
+                                            } else {
+                                                byte[] outing=AES.encryption("FAIL login", key);
+                                                //out.println("FAIL login");
+                                                //out.flush();
+                                                os.write(outing);
+                                                os.flush();
                                             }
+                                        }
 
-                                            // param LOGOUT
-                                            if (input.split(" ")[0].toLowerCase().equals("logout") == true) {
-                                                String[] vals = input.split(" ");
+                                        // param LOGOUT
+                                        if (input.split(" ")[0].toLowerCase().equals("logout") == true) {
+                                            String[] vals = input.split(" ");
 
-                                                if (this._loginlist.contains(new Pair(this.socket, this.username)) == true) {
-                                                    this._loginlist.remove(new Pair(this.socket, this.username));
-                                                    System.out.println(this._loginlist.size());
-                                                    byte[] outing=AES.encryption("FAIL logout", key);
-                                                    //out.println("FAIL login");
-                                                    //out.flush();
-                                                    os.write(outing);
-                                                    os.flush();
-                                                    this.socket.close();
-                                                    break;
-                                                } else {
-                                                    byte[] outing=AES.encryption("FAIL logout", key);
-                                                    //out.println("FAIL login");
-                                                    //out.flush();
-                                                    os.write(outing);
-                                                    os.flush();
-                                                }
+                                            if (this._loginlist.contains(new Pair(this.socket, this.username)) == true) {
+                                                this._loginlist.remove(new Pair(this.socket, this.username));
+                                                System.out.println(this._loginlist.size());
+                                                byte[] outing=AES.encryption("FAIL logout", key);
+                                                //out.println("FAIL login");
+                                                //out.flush();
+                                                os.write(outing);
+                                                os.flush();
+                                                this.socket.close();
+                                                break;
+                                            } else {
+                                                byte[] outing=AES.encryption("FAIL logout", key);
+                                                //out.println("FAIL login");
+                                                //out.flush();
+                                                os.write(outing);
+                                                os.flush();
                                             }
+                                        }
 
-                                            // param PM <userName dst> <message>
-                                            if (input.split(" ")[0].toLowerCase().equals("pm") == true) {
-                                                String[] vals = input.split(" ");
+                                        // param PM <userName dst> <message>
+                                        if (input.split(" ")[0].toLowerCase().equals("pm") == true) {
+                                            String[] vals = input.split(" ");
 
-                                                boolean exist = false;
-                                                OutputStream osDest=null;
-                                                for(Pair<Socket, String> cur : _loginlist) {
-                                                    if (cur.getSecond().equals(vals[1])) {
-                                                        //PrintWriter outDest = new PrintWriter(cur.getFirst().getOutputStream());
-                                                        osDest = cur.getFirst().getOutputStream();
-                                                        String messageOut = "";
-                                                        for (int j = 2; j<vals.length; j++) {
-                                                            messageOut += vals[j] + " ";
-                                                        }
-                                                        System.out.println(this.username + " to " + vals[1] + " : " + messageOut);
-                                                        //outDest.println(this.username + ": " + messageOut);
-                                                        //outDest.flush();
-                                                        String pesan=this.username + ": " + messageOut;
-                                                        
-                                                        for(Pair<String,String> cue : _keylist){
-                                                            if(cue.getFirst().equals(cur.getSecond())){
-                                                                String keyout=cue.getSecond();
-                                                                byte[] outing=AES.encrypt(pesan, keyout);
-                                                                osDest.write(outing);
-                                                                osDest.flush();
-                                                            }
-                                                        }
-                                                        exist = true;
+                                            boolean exist = false;
+                                            OutputStream osDest=null;
+                                            for(Pair<Socket, String> cur : _loginlist) {
+                                                if (cur.getSecond().equals(vals[1])) {
+                                                    //PrintWriter outDest = new PrintWriter(cur.getFirst().getOutputStream());
+                                                    osDest = cur.getFirst().getOutputStream();
+                                                    String messageOut = "";
+                                                    for (int j = 2; j<vals.length; j++) {
+                                                        messageOut += vals[j] + " ";
                                                     }
+                                                    System.out.println(this.username + " to " + vals[1] + " : " + messageOut);
+                                                    //outDest.println(this.username + ": " + messageOut);
+                                                    //outDest.flush();
+                                                    String pesan=this.username + ": " + messageOut;
+
+                                                    for(Pair<String,String> cue : _keylist){
+                                                        if(cue.getFirst().equals(cur.getSecond())){
+                                                            String keyout=cue.getSecond();
+                                                            byte[] outing=AES.encrypt(pesan, keyout);
+                                                            osDest.write(outing);
+                                                            osDest.flush();
+                                                        }
+                                                    }
+                                                    exist = true;
                                                 }
-                                                if (exist == false) {
-                                                    System.out.println("pm to " + vals[1] + " by " + this.username + " failed.");
-                                                    //out.println("FAIL pm");
-                                                    //out.flush();
-                                                    byte[] outing=AES.encrypt("FAILPM", key);
-                                                    osDest.write(outing);
-                                                    osDest.flush();
+                                            }
+                                            if (exist == false) {
+                                                System.out.println("pm to " + vals[1] + " by " + this.username + " failed.");
+                                                //out.println("FAIL pm");
+                                                //out.flush();
+                                                byte[] outing=AES.encrypt("FAILPM", key);
+                                                osDest.write(outing);
+                                                osDest.flush();
+                                            }
+                                        }
+
+                                        // param CG <groupName>
+                                        if (input.split(" ")[0].toLowerCase().equals("cg") == true) {
+                                            String[] vals = input.split(" ");
+
+                                            boolean exist = false;
+
+                                            for(Pair<String, String> selGroup : _grouplist) {
+                                                if (selGroup.getFirst().equals(vals[1])) {
+                                                    exist = true;
                                                 }
                                             }
 
-                                            // param CG <groupName>
-                                            if (input.split(" ")[0].toLowerCase().equals("cg") == true) {
-                                                String[] vals = input.split(" ");
+                                            if(exist == false) {
+                                                Group group = new Group();
+                                                int total = group.updateGroup(vals[1], this.username, _grouplist);
+                                                System.out.println("total group: " + total);
+                                                System.out.println("cg " + vals[1] + " by " + this.username + " successed.");
+                                                //out.println("SUCCESS cg");
+                                                //out.flush();
+                                                byte[] outing=AES.encrypt("SUCCESS cg", key);
+                                                os.write(outing);
+                                                os.flush();
+                                            } else {
+                                                System.out.println("cg " + vals[1] + " by " + this.username + " failed.");
+                                                //out.println("FAIL cg");
+                                                //out.flush();
+                                                byte[] outing=AES.encrypt("FAIL cg", key);
+                                                os.write(outing);
+                                                os.flush();
+                                            }
+                                        }
 
-                                                boolean exist = false;
+                                        // param GM <groupName> <message>
+                                        if (input.split(" ")[0].toLowerCase().equals("gm") == true) {
+                                            String[] vals = input.split(" ");
 
+                                            boolean exist = false;
+
+                                            for(Pair<String, String> selGroup : _grouplist) {
+                                                if (selGroup.getSecond().equals(this.username)) {
+                                                    exist = true;
+                                                }
+                                            }
+
+                                            if (exist == true) {
                                                 for(Pair<String, String> selGroup : _grouplist) {
                                                     if (selGroup.getFirst().equals(vals[1])) {
-                                                        exist = true;
-                                                    }
-                                                }
-
-                                                if(exist == false) {
-                                                    Group group = new Group();
-                                                    int total = group.updateGroup(vals[1], this.username, _grouplist);
-                                                    System.out.println("total group: " + total);
-                                                    System.out.println("cg " + vals[1] + " by " + this.username + " successed.");
-                                                    //out.println("SUCCESS cg");
-                                                    //out.flush();
-                                                    byte[] outing=AES.encrypt("SUCCESS cg", key);
-                                                    os.write(outing);
-                                                    os.flush();
-                                                } else {
-                                                    System.out.println("cg " + vals[1] + " by " + this.username + " failed.");
-                                                    //out.println("FAIL cg");
-                                                    //out.flush();
-                                                    byte[] outing=AES.encrypt("FAIL cg", key);
-                                                    os.write(outing);
-                                                    os.flush();
-                                                }
-                                            }
-
-                                            // param GM <groupName> <message>
-                                            if (input.split(" ")[0].toLowerCase().equals("gm") == true) {
-                                                String[] vals = input.split(" ");
-
-                                                boolean exist = false;
-
-                                                for(Pair<String, String> selGroup : _grouplist) {
-                                                    if (selGroup.getSecond().equals(this.username)) {
-                                                        exist = true;
-                                                    }
-                                                }
-
-                                                if (exist == true) {
-                                                    for(Pair<String, String> selGroup : _grouplist) {
-                                                        if (selGroup.getFirst().equals(vals[1])) {
-                                                            for(Pair<Socket, String> cur : _loginlist) {
-                                                                if (cur.getSecond().equals(selGroup.getSecond()) && !cur.getFirst().equals(socket)) {
-                                                                    //PrintWriter outDest = new PrintWriter(cur.getFirst().getOutputStream());
-                                                                    OutputStream osDest=cur.getFirst().getOutputStream();
-                                                                    String messageOut = "";
-                                                                    for (int j = 2; j<vals.length; j++) {
-                                                                        messageOut += vals[j] + " ";
-                                                                    }
-                                                                    System.out.println(this.username + " to " + vals[1] + " group: " + messageOut);
-                                                                    String pesan=this.username + " @ " + vals[1] + " group: " + messageOut;
-                                                                    //outDest.println();
-                                                                    //outDest.flush();
-                                                                    for(Pair<String,String> cue : _keylist){
-                                                                        if(cue.getFirst().equals(cur.getSecond())){
-                                                                            String keyout=cue.getSecond();
-                                                                            byte[] outing=AES.encrypt(pesan, keyout);
-                                                                            osDest.write(outing);
-                                                                            osDest.flush();
-                                                                        }
+                                                        for(Pair<Socket, String> cur : _loginlist) {
+                                                            if (cur.getSecond().equals(selGroup.getSecond()) && !cur.getFirst().equals(socket)) {
+                                                                //PrintWriter outDest = new PrintWriter(cur.getFirst().getOutputStream());
+                                                                OutputStream osDest=cur.getFirst().getOutputStream();
+                                                                String messageOut = "";
+                                                                for (int j = 2; j<vals.length; j++) {
+                                                                    messageOut += vals[j] + " ";
+                                                                }
+                                                                System.out.println(this.username + " to " + vals[1] + " group: " + messageOut);
+                                                                String pesan=this.username + " @ " + vals[1] + " group: " + messageOut;
+                                                                //outDest.println();
+                                                                //outDest.flush();
+                                                                for(Pair<String,String> cue : _keylist){
+                                                                    if(cue.getFirst().equals(cur.getSecond())){
+                                                                        String keyout=cue.getSecond();
+                                                                        byte[] outing=AES.encrypt(pesan, keyout);
+                                                                        osDest.write(outing);
+                                                                        osDest.flush();
                                                                     }
                                                                 }
                                                             }
-                                                            
                                                         }
+
                                                     }
-                                                } else {
-                                                    System.out.println("gm to " + vals[1] + " by " + this.username + " failed.");
-                                                    //out.println("FAIL gm");
-                                                    //out.flush();
-                                                    byte[] outing=AES.encrypt("FAIL gm", key);
-                                                    os.write(outing);
-                                                    os.flush();
                                                 }
+                                            } else {
+                                                System.out.println("gm to " + vals[1] + " by " + this.username + " failed.");
+                                                //out.println("FAIL gm");
+                                                //out.flush();
+                                                byte[] outing=AES.encrypt("FAIL gm", key);
+                                                os.write(outing);
+                                                os.flush();
                                             }
+                                        }
 
-                                            // param BM <message>
-                                            if (input.split(" ")[0].toLowerCase().equals("bm") == true) {
-                                                String[] vals = input.split(" ");
+                                        // param BM <message>
+                                        if (input.split(" ")[0].toLowerCase().equals("bm") == true) {
+                                            String[] vals = input.split(" ");
 
-                                                for(Pair<Socket, String> cur : _loginlist) {
-                                                    if (!cur.getFirst().equals(socket)) {
-                                                        OutputStream osDest=cur.getFirst().getOutputStream();
-                                                        String messageOut = "";
-                                                        for (int j = 1; j<vals.length; j++) {
-                                                            messageOut += vals[j] + " ";
-                                                        }
-                                                        String pesan=this.username + " <BROADCAST>: " + messageOut;
-                                                        System.out.println(this.username + " to alls: " + messageOut);
-                                                        //outDest.println(this.username + " <BROADCAST>: " + messageOut);
-                                                        //outDest.flush();
-                                                        for(Pair<String,String> cue : _keylist){
-                                                            if(cue.getFirst().equals(cur.getSecond())){
-                                                                String keyout=cue.getSecond();
-                                                                byte[] outing=AES.encrypt(pesan, keyout);
-                                                                osDest.write(outing);
-                                                                osDest.flush();
-                                                            }
+                                            for(Pair<Socket, String> cur : _loginlist) {
+                                                if (!cur.getFirst().equals(socket)) {
+                                                    OutputStream osDest=cur.getFirst().getOutputStream();
+                                                    String messageOut = "";
+                                                    for (int j = 1; j<vals.length; j++) {
+                                                        messageOut += vals[j] + " ";
+                                                    }
+                                                    String pesan=this.username + " <BROADCAST>: " + messageOut;
+                                                    System.out.println(this.username + " to alls: " + messageOut);
+                                                    //outDest.println(this.username + " <BROADCAST>: " + messageOut);
+                                                    //outDest.flush();
+                                                    for(Pair<String,String> cue : _keylist){
+                                                        if(cue.getFirst().equals(cur.getSecond())){
+                                                            String keyout=cue.getSecond();
+                                                            byte[] outing=AES.encrypt(pesan, keyout);
+                                                            osDest.write(outing);
+                                                            osDest.flush();
                                                         }
                                                     }
                                                 }
                                             }
                                         }
+
 				}
 			}
 		} 
